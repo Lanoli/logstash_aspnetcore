@@ -13,10 +13,10 @@ namespace Toolbox.Logstash.Options
 
             var options = new LogstashOptions()
             {
-                AppId = config.Get<string>(Defaults.ConfigKeys.AppId),
-                Url = config.Get<string>(Defaults.ConfigKeys.Url),
-                Index = config.Get<string>(Defaults.ConfigKeys.Index),
-                MinimumLevel = config.Get<LogLevel>(Defaults.ConfigKeys.MinimumLevel)
+                AppId = config.GetValue<string>(Defaults.ConfigKeys.AppId),
+                Url = config.GetValue<string>(Defaults.ConfigKeys.Url),
+                Index = config.GetValue<string>(Defaults.ConfigKeys.Index),
+                MinimumLevel = config.GetValue<LogLevel>(Defaults.ConfigKeys.MinimumLevel)
             };
 
             Validate(options);

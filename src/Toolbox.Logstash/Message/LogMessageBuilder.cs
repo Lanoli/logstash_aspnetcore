@@ -4,9 +4,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using Toolbox.Correlation;
+using Digipolis.Correlation;
 using Toolbox.Logstash.Loggers;
 using Toolbox.Logstash.Options.Internal;
+using System.Threading.Tasks;
 
 namespace Toolbox.Logstash.Message
 {
@@ -20,7 +21,7 @@ namespace Toolbox.Logstash.Message
             ServiceProvider = serviceProvider;
             LogLevelConverter = logLevelConverter;
             Options = options;
-            LocalIPAddress = GetLocalIPAddress();
+            LocalIPAddress = GetLocalIPAddress().Result ;
             CurrentProcess = GetCurrentProcessId();
         }
 
@@ -42,10 +43,11 @@ namespace Toolbox.Logstash.Message
             var logMessage = new LogMessage(logstashLevel); 
             
             string message;
-            if ( formatter != null )
+            if (formatter != null)
                 message = formatter(state, exception);
             else
-                message = Microsoft.Extensions.Logging.LogFormatter.Formatter(state, exception);
+                message = "TODO LogFormatter";// Microsoft.Extensions.Logging.LogFormatter.Formatter(state, exception);
+
 
             if ( !string.IsNullOrEmpty(message) )
             {
@@ -73,14 +75,14 @@ namespace Toolbox.Logstash.Message
         {
             var correlationContext = ServiceProvider.GetService(typeof(ICorrelationContext)) as ICorrelationContext;
             if ( correlationContext != null )
-                return new LogMessageCorrelation(correlationContext.CorrelationSource, correlationContext.CorrelationId);
+                return new LogMessageCorrelation(correlationContext.SourceName, correlationContext.Id);
             else
                 return new LogMessageCorrelation(Options.AppId, Guid.NewGuid().ToString());
         }
 
-        private string GetLocalIPAddress()
+        private async Task<string> GetLocalIPAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
+            var host = await Dns.GetHostEntryAsync(Dns.GetHostName());
             foreach ( var ip in host.AddressList )
             {
                 if ( ip.AddressFamily == AddressFamily.InterNetwork )

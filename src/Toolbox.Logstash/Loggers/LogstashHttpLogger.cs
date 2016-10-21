@@ -34,7 +34,9 @@ namespace Toolbox.Logstash.Loggers
         {
             if (OnMessage != null) OnMessage(this, new MessageEventArgs(message));
 
-            var headers = new WebHeaderCollection { { HttpRequestHeader.ContentType, "application/json" } };
+            var headers = new WebHeaderCollection();
+
+            headers[HttpRequestHeader.ContentType] = "application/json";
 
             //TBD using defaults
             //var jsonSerializerSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };

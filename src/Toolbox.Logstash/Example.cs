@@ -6,7 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Toolbox.Logstash.Client;
 using Toolbox.Logstash.Message;
-using Microsoft.AspNet.Builder.Internal;
+using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Toolbox.Logstash
@@ -18,7 +18,7 @@ namespace Toolbox.Logstash
             var services = new ServiceCollection();
             var app = new ApplicationBuilder(services.BuildServiceProvider());
             var factory = new LoggerFactory();
-            factory.MinimumLevel = Microsoft.Extensions.Logging.LogLevel.Debug;
+            //TODO ? //factory.MinimumLevel = Microsoft.Extensions.Logging.LogLevel.Debug;
             factory.AddLogstashHttp(app, options => 
                                     {
                                         options.Index = "index";

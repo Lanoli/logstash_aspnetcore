@@ -32,7 +32,7 @@ namespace Toolbox.Logstash.Client
                 {
                     try
                     {
-                        _userAgent = string.Format("digipolis.be logstash client/{0}", Assembly.GetExecutingAssembly().GetName().Version);
+                        _userAgent = string.Format("digipolis.be logstash client/{0}", typeof(DotNetWebClientProxy).GetTypeInfo().Assembly.GetName().Version);
                     }
                     catch
                     {
@@ -50,29 +50,37 @@ namespace Toolbox.Logstash.Client
 
             var request = (HttpWebRequest)WebRequest.Create(Uri);
             request.Method = "POST";
-            request.Timeout = 5000;
-            request.UserAgent = UserAgent;
+            //request.Timeout = 5000;
+            //request.UserAgent = UserAgent;
 
             if (headers != null)
             {
                 // Some headers like Content-Type cannot be added directly
                 // and therefore must be treated specially and go over 
                 // the corresponding property on the HttpWebRequest object.
-
-                headers = new WebHeaderCollection { headers };
-                var contentType = headers[HttpRequestHeader.ContentType];
-                if (contentType != null)
+                var tempHeaders = new WebHeaderCollection();
+                foreach (var headerKey in headers.AllKeys)
                 {
-                    request.ContentType = contentType;
-                    headers.Remove(HttpRequestHeader.ContentType);
+                    tempHeaders[headerKey] = headers[headerKey];
+                    //TODO : contenttype header apart behandelen.
                 }
 
-                request.Headers.Add(headers);
+                //var contentType = headers[HttpRequestHeader.ContentType];
+                //if (contentType != null)
+                //{
+                //    request.ContentType = contentType;
+                //    tempHeaders.Remove()
+                //}
+
+                foreach (var headerKey in tempHeaders.AllKeys)
+                {
+                    request.Headers[headerKey] = tempHeaders[headerKey];
+                }
             }
 
             var encoding = Encoding.UTF8;
             var bytes = encoding.GetBytes(data);
-            request.ContentLength = bytes.Length;
+            //request.ContentLength = bytes.Length;
 
             return Spawn<T>(tcs => Post(request, bytes, tcs, resultor));
         }
@@ -102,10 +110,15 @@ namespace Toolbox.Logstash.Client
             if (resultor == null) throw new ArgumentNullException("resultor");
 
             var request = (HttpWebRequest)WebRequest.Create(new Uri(Uri, id));
-            request.UserAgent = UserAgent;
+            //request.UserAgent = UserAgent;
 
             if (headers != null)
-                request.Headers.Add(headers);
+            {
+                foreach (var headerKey in headers.AllKeys)
+                {
+                    request.Headers[headerKey] = headers[headerKey];
+                }
+            }
 
             return Spawn<T>(tcs => GetResponse(request, tcs, resultor));
         }
@@ -122,10 +135,11 @@ namespace Toolbox.Logstash.Client
             using (var response = getResponseTask.Result)
             using (var stream = response.GetResponseStream())
             {
+                //http://stackoverflow.com/questions/17293762/errorsystem-text-encoding-does-not-contain-a-definition-for-default
                 var contentType = response.Headers.Map(HttpResponseHeader.ContentType, h => new ContentType(h));
                 var encoding = contentType != null
-                             ? contentType.EncodingFromCharSet(Encoding.Default)
-                             : Encoding.Default;
+                             ? contentType.EncodingFromCharSet(Encoding.UTF8)
+                             : Encoding.UTF8;
 
                 var sb = new StringBuilder();
                 foreach (var task in ReadAllText(stream, encoding, sb))

@@ -14,7 +14,7 @@ namespace Toolbox.Logstash.Loggers
                 case LogLevel.Debug:
                     level = LogstashLevel.Debug;
                     break;
-                case LogLevel.Verbose:
+                case LogLevel.Trace:
                     level = LogstashLevel.Trace;
                     break;
                 case LogLevel.Information:

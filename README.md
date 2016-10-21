@@ -24,7 +24,7 @@ To add the toolbox to a project, you add the package to the project.json :
 
 ``` json 
 "dependencies": {
-    "Toolbox.Logstash":  "0.7.0"
+    "Toolbox.Logstash":  "2.0.0"
  }
 ``` 
 
